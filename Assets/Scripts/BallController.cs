@@ -1,14 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    [SerializeField] private float defaultSpeed;
-    [SerializeField] private float minScale;
-    [SerializeField] private float maxScale;
+    public static event Action<int> OnExplode = delegate {};
 
-    private float generatedSpeed;
+    [SerializeField] private int defaultPoints;
+    [SerializeField] private float defaultSpeed;
+    [SerializeField] private float minModifier;
+    [SerializeField] private float maxModifier;
+    [Header("GeneratedStats")]
+    [SerializeField] private int generatedPoints;
+    [SerializeField] private float generatedSpeed;
+
+
     private Camera mainCamera;
     private float cameraDistance;
     private Vector3 viewportBottomPosition;
@@ -23,9 +30,7 @@ public class BallController : MonoBehaviour
         
         viewportTopPosition = mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 1f, cameraDistance));
         
-        SetBottomPosition();
-        SetRandomColor();
-        SetRandomScale();
+        Initialize();
     }
 
     void Update()
@@ -36,28 +41,40 @@ public class BallController : MonoBehaviour
         }
         else
         {
+            Initialize();
+        }
+    }
+
+    public void Initialize()
+    {
             SetBottomPosition();
             SetRandomColor();
             SetRandomScale();
-        }
     }
 
     private void SetRandomColor()
     {
-        rend.material.SetColor("_BaseColor", Random.ColorHSV());
+        rend.material.SetColor("_BaseColor", UnityEngine.Random.ColorHSV());
     }
 
     private void SetRandomScale()
     {
-        float randomModifier = Random.Range(minScale, maxScale);
+        float randomModifier = UnityEngine.Random.Range(minModifier, maxModifier);
         transform.localScale = Vector3.one * randomModifier;
         generatedSpeed = defaultSpeed * (1 / randomModifier);
+        generatedPoints = Mathf.RoundToInt(defaultPoints * (1 / randomModifier));
     }
 
     private void SetBottomPosition()
     {
-        float horizontalViewportPosition = Random.Range(0f, 1f);
+        float horizontalViewportPosition = UnityEngine.Random.Range(0f, 1f);
         viewportBottomPosition = mainCamera.ViewportToWorldPoint(new Vector3(horizontalViewportPosition, 0f, cameraDistance));
         transform.position = viewportBottomPosition + (Vector3.down * transform.localScale.y) + (horizontalViewportPosition >= 0.5f ?  Vector3.left : Vector3.right * transform.localScale.x);
+    }
+
+    private void OnMouseDown()
+    {
+        OnExplode(generatedPoints);
+        Initialize();
     }
 }
