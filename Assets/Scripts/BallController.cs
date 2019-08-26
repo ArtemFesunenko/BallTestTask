@@ -21,6 +21,7 @@ public class BallController : MonoBehaviour
     private Vector3 viewportBottomPosition;
     private Vector3 viewportTopPosition;
     private Renderer rend;
+    private float randomModifier;
 
     void Start()
     {
@@ -37,7 +38,7 @@ public class BallController : MonoBehaviour
     {
         if (transform.position.y <= viewportTopPosition.y + transform.localScale.y)
         {
-            transform.position += Vector3.up * Time.deltaTime * generatedSpeed;
+            transform.position += Vector3.up * Time.deltaTime * GeneratedSpeed();
         }
         else
         {
@@ -47,9 +48,12 @@ public class BallController : MonoBehaviour
 
     public void Initialize()
     {
-            SetBottomPosition();
-            SetRandomColor();
-            SetRandomScale();
+        SetRandomColor();
+        SetRandomModifier();
+        SetRandomScale();
+        GeneratedSpeed();
+        SetRandomPoints();
+        SetBottomPosition();
     }
 
     private void SetRandomColor()
@@ -57,11 +61,24 @@ public class BallController : MonoBehaviour
         rend.material.SetColor("_BaseColor", UnityEngine.Random.ColorHSV());
     }
 
+    private void SetRandomModifier()
+    {
+        randomModifier = UnityEngine.Random.Range(minModifier, maxModifier);
+    }
+
     private void SetRandomScale()
     {
-        float randomModifier = UnityEngine.Random.Range(minModifier, maxModifier);
         transform.localScale = Vector3.one * randomModifier;
-        generatedSpeed = defaultSpeed * (1 / randomModifier);
+    }
+
+    private float GeneratedSpeed()
+    {
+        float newSpeed = defaultSpeed * (Timer.Instance.timeCounter / Timer.Instance.timeLeft) * (1 / randomModifier);
+        return newSpeed;
+    }
+
+    private void SetRandomPoints()
+    {
         generatedPoints = Mathf.RoundToInt(defaultPoints * (1 / randomModifier));
     }
 
