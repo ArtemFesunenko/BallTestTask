@@ -11,11 +11,8 @@ public class BallController : MonoBehaviour
     [SerializeField] private float defaultSpeed;
     [SerializeField] private float minModifier;
     [SerializeField] private float maxModifier;
-    [Header("GeneratedStats")]
-    [SerializeField] private int generatedPoints;
-    [SerializeField] private float generatedSpeed;
 
-
+    private int generatedPoints;
     private Camera mainCamera;
     private float cameraDistance;
     private Vector3 viewportBottomPosition;
@@ -48,10 +45,10 @@ public class BallController : MonoBehaviour
 
     public void Initialize()
     {
+        rend.material.SetFloat("_DissolveAmount", 0);
         SetRandomColor();
         SetRandomModifier();
         SetRandomScale();
-        GeneratedSpeed();
         SetRandomPoints();
         SetBottomPosition();
     }
@@ -92,6 +89,18 @@ public class BallController : MonoBehaviour
     private void OnMouseDown()
     {
         OnExplode(generatedPoints);
+        StartCoroutine(ExplosionAnimation());
+    }
+
+    private IEnumerator ExplosionAnimation()
+    {
+        float timer = 0;
+        while (timer < 0.5f)
+        {
+            timer += Time.deltaTime;
+            rend.material.SetFloat("_DissolveAmount", timer);
+            yield return null;
+        }
         Initialize();
     }
 }
