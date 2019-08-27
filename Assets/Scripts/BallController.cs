@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-    public static event Action<int> OnExplode = delegate {};
+    public static event Action<int, Vector3> OnExplode = delegate {};
 
     [SerializeField] private int defaultPoints;
     [SerializeField] private float defaultSpeed;
     [SerializeField] private float minModifier;
     [SerializeField] private float maxModifier;
+    [SerializeField] private float dissolveSpeed;
 
     private int generatedPoints;
     private Camera mainCamera;
@@ -19,6 +20,8 @@ public class BallController : MonoBehaviour
     private Vector3 viewportTopPosition;
     private Renderer rend;
     private float randomModifier;
+    private const string dissolveAmountText = "_DissolveAmount";
+    private const string baseColorText = "_BaseColor";
 
     void Start()
     {
@@ -45,7 +48,7 @@ public class BallController : MonoBehaviour
 
     public void Initialize()
     {
-        rend.material.SetFloat("_DissolveAmount", 0);
+        rend.material.SetFloat(dissolveAmountText, 0);
         SetRandomColor();
         SetRandomModifier();
         SetRandomScale();
@@ -55,7 +58,7 @@ public class BallController : MonoBehaviour
 
     private void SetRandomColor()
     {
-        rend.material.SetColor("_BaseColor", UnityEngine.Random.ColorHSV());
+        rend.material.SetColor(baseColorText, UnityEngine.Random.ColorHSV());
     }
 
     private void SetRandomModifier()
@@ -83,22 +86,23 @@ public class BallController : MonoBehaviour
     {
         float horizontalViewportPosition = UnityEngine.Random.Range(0f, 1f);
         viewportBottomPosition = mainCamera.ViewportToWorldPoint(new Vector3(horizontalViewportPosition, 0f, cameraDistance));
-        transform.position = viewportBottomPosition + (Vector3.down * transform.localScale.y) + (horizontalViewportPosition >= 0.5f ?  Vector3.left : Vector3.right * transform.localScale.x);
+        Vector3 horizontalBoundsDirection = horizontalViewportPosition >= 0.5f ?  Vector3.left : Vector3.right;
+        transform.position = viewportBottomPosition + (Vector3.down * transform.localScale.y) + (horizontalBoundsDirection * transform.localScale.x);
     }
 
     private void OnMouseDown()
     {
-        OnExplode(generatedPoints);
+        OnExplode(generatedPoints, transform.position);
         StartCoroutine(ExplosionAnimation());
     }
 
     private IEnumerator ExplosionAnimation()
     {
         float timer = 0;
-        while (timer < 0.5f)
+        while (timer < 1)
         {
-            timer += Time.deltaTime;
-            rend.material.SetFloat("_DissolveAmount", timer);
+            timer += Time.deltaTime * dissolveSpeed;
+            rend.material.SetFloat(dissolveAmountText, timer);
             yield return null;
         }
         Initialize();

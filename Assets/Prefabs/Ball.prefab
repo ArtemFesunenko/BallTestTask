@@ -108,3 +108,4 @@ MonoBehaviour:
   defaultSpeed: 2
   minModifier: 0.5
   maxModifier: 2
+  dissolveSpeed: 2
