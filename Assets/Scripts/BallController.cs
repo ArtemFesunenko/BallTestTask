@@ -22,6 +22,7 @@ public class BallController : MonoBehaviour
     private float randomModifier;
     private const string dissolveAmountText = "_DissolveAmount";
     private const string baseColorText = "_BaseColor";
+    private bool exploded = false;
 
     void Start()
     {
@@ -54,6 +55,7 @@ public class BallController : MonoBehaviour
         SetRandomScale();
         SetRandomPoints();
         SetBottomPosition();
+        exploded = false;
     }
 
     private void SetRandomColor()
@@ -73,7 +75,8 @@ public class BallController : MonoBehaviour
 
     private float GeneratedSpeed()
     {
-        float newSpeed = defaultSpeed * (Timer.Instance.timeCounter / Timer.Instance.timeLeft) * (1 / randomModifier);
+        float timerModifier = Timer.Instance.timeCounter / Timer.Instance.timeLeft;
+        float newSpeed = defaultSpeed * (Timer.Instance.timeLeft > 0 ? timerModifier : 0) * (1 / randomModifier);
         return newSpeed;
     }
 
@@ -92,8 +95,12 @@ public class BallController : MonoBehaviour
 
     private void OnMouseDown()
     {
-        OnExplode(generatedPoints, transform.position);
-        StartCoroutine(ExplosionAnimation());
+        if (!exploded)
+        {
+            exploded = true;
+            OnExplode(generatedPoints, transform.position);
+            StartCoroutine(ExplosionAnimation());
+        }
     }
 
     private IEnumerator ExplosionAnimation()

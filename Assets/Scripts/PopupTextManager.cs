@@ -23,4 +23,9 @@ public class PopupTextManager : MonoBehaviour
         popupTextGO.transform.position = mainCamera.WorldToScreenPoint(position);
         Destroy(popupTextGO, 0.2f);
     }
+
+    private void OnDestroy()
+    {
+        BallController.OnExplode -= InstancePopupText;
+    }
 }
